@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import logo from "../assets/logo.svg";
-import { FiShoppingCart, FiX } from "react-icons/fi";
+import { FiShoppingCart, FiX, FiTrash2 } from "react-icons/fi";
 import { useCart } from "./CartContext";
 
 export default function Navbar({ onCartClick }) {
   const [isOpen, setIsOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
+  const { cartItems, removeItem } = useCart();
 
-  const { cartItems } = useCart();
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const openCartModal = () => {
@@ -20,6 +20,11 @@ export default function Navbar({ onCartClick }) {
     const priceNum = parseFloat(item.price.replace(/[^0-9.]+/g, ""));
     return sum + priceNum * item.quantity;
   }, 0);
+
+  const confirmDelete = (dishName) => {
+    const confirmed = window.confirm(`Delete "${dishName}" from cart?`);
+    if (confirmed) removeItem(dishName);
+  };
 
   return (
     <>
@@ -36,7 +41,7 @@ export default function Navbar({ onCartClick }) {
 
         <ul className={isOpen ? "links open" : "links"}>
           <li>
-            <a href="#home" className="active" onClick={() => setIsOpen(false)}>
+            <a href="#home" onClick={() => setIsOpen(false)}>
               Home
             </a>
           </li>
@@ -95,6 +100,9 @@ export default function Navbar({ onCartClick }) {
                           parseFloat(price.replace(/[^0-9.]+/g, "")) * quantity
                         ).toFixed(2)}
                       </span>
+                      <DeleteButton onClick={() => confirmDelete(name)}>
+                        <FiTrash2 />
+                      </DeleteButton>
                     </CartItem>
                   ))}
                 </CartList>
@@ -107,6 +115,15 @@ export default function Navbar({ onCartClick }) {
     </>
   );
 }
+
+// Additional styles (same as before + delete button)
+const DeleteButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #e63946;
+  cursor: pointer;
+  margin-left: 0.5rem;
+`;
 
 const Nav = styled.nav`
   display: flex;

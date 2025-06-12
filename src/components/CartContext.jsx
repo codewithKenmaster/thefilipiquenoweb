@@ -5,20 +5,20 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on first render
   useEffect(() => {
     const saved = localStorage.getItem("cartItems");
     if (saved) setCartItems(JSON.parse(saved));
   }, []);
 
-  // Save cart to localStorage on cartItems change
+  // Save to localStorage every time cart changes
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Add dish with quantity to cart
+  // Add dish with quantity
   const addToCart = (dish, quantity) => {
-    if (quantity <= 0) return; // Ignore non-positive quantities
+    if (quantity <= 0) return;
     setCartItems((prev) => {
       const exists = prev.find((item) => item.name === dish.name);
       if (exists) {
@@ -33,25 +33,23 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Update quantity of an existing dish in cart
+  // Update quantity (set to zero to remove)
   const updateQuantity = (dishName, newQuantity) => {
-    if (newQuantity < 0) return; // Ignore negative quantities
-    setCartItems((prev) => {
-      // If quantity is zero, remove item from cart
-      if (newQuantity === 0) {
-        return prev.filter((item) => item.name !== dishName);
-      }
-      return prev.map((item) =>
-        item.name === dishName ? { ...item, quantity: newQuantity } : item
-      );
-    });
+    if (newQuantity < 0) return;
+    setCartItems((prev) =>
+      newQuantity === 0
+        ? prev.filter((item) => item.name !== dishName)
+        : prev.map((item) =>
+            item.name === dishName ? { ...item, quantity: newQuantity } : item
+          )
+    );
   };
 
-  // Remove a dish completely from cart
+  // Remove item completely
   const removeItem = (dishName) =>
     setCartItems((prev) => prev.filter((item) => item.name !== dishName));
 
-  // Clear entire cart
+  // Clear all items from cart
   const clearCart = () => setCartItems([]);
 
   return (
@@ -63,5 +61,4 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// Hook to consume cart context
 export const useCart = () => useContext(CartContext);
